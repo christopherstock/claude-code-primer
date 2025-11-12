@@ -58,3 +58,6 @@ redis/data/*
 
 # Docker
 .docker/
+
+# Claude Code
+.claude
