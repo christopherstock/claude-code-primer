@@ -1,10 +1,10 @@
 """
 Tests for RedisService class.
 """
-import pytest
 import json
 from datetime import datetime
-from app.services.redis_service import RedisService
+
+import pytest
 
 
 @pytest.mark.unit
@@ -60,9 +60,7 @@ class TestCreateTodo:
         redis_service.create_todo(todo_id, sample_todo_data)
 
         # Check if ID is in the list
-        todo_ids = redis_service.redis_client.lrange(
-            redis_service.todo_list_key, 0, -1
-        )
+        todo_ids = redis_service.redis_client.lrange(redis_service.todo_list_key, 0, -1)
         assert todo_id in todo_ids
 
     def test_create_multiple_todos(self, redis_service, multiple_todos):
@@ -75,9 +73,7 @@ class TestCreateTodo:
             created_ids.append(result["id"])
 
         # Verify all are in the list
-        todo_ids = redis_service.redis_client.lrange(
-            redis_service.todo_list_key, 0, -1
-        )
+        todo_ids = redis_service.redis_client.lrange(redis_service.todo_list_key, 0, -1)
         for created_id in created_ids:
             assert created_id in todo_ids
 
@@ -97,6 +93,7 @@ class TestCreateTodo:
         # created_at and updated_at should be very close (within a second)
         # They may differ by microseconds due to execution time
         from datetime import datetime as dt
+
         created_dt = dt.fromisoformat(created_at)
         updated_dt = dt.fromisoformat(updated_at)
         time_diff = abs((updated_dt - created_dt).total_seconds())
@@ -234,11 +231,7 @@ class TestUpdateTodo:
         todo_id = "test-id-12"
         redis_service.create_todo(todo_id, sample_todo_data)
 
-        update_data = {
-            "title": "New Title",
-            "description": "New Description",
-            "completed": True
-        }
+        update_data = {"title": "New Title", "description": "New Description", "completed": True}
         updated = redis_service.update_todo(todo_id, update_data)
 
         assert updated["title"] == "New Title"
@@ -260,6 +253,7 @@ class TestUpdateTodo:
 
         # Small delay to ensure timestamp difference
         import time
+
         time.sleep(0.01)
 
         update_data = {"title": "Updated"}
@@ -329,9 +323,7 @@ class TestDeleteTodo:
         redis_service.delete_todo(todo_id)
 
         # Verify it's not in the list
-        todo_ids = redis_service.redis_client.lrange(
-            redis_service.todo_list_key, 0, -1
-        )
+        todo_ids = redis_service.redis_client.lrange(redis_service.todo_list_key, 0, -1)
         assert todo_id not in todo_ids
 
     def test_delete_todo_not_found(self, redis_service):
@@ -397,6 +389,7 @@ class TestHealthCheck:
 
     def test_health_check_handles_exception(self, redis_service, monkeypatch):
         """Test that health check handles exceptions gracefully."""
+
         def mock_ping_error():
             raise Exception("Connection error")
 

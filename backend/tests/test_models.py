@@ -1,10 +1,12 @@
 """
 Tests for Pydantic models (TodoBase, TodoCreate, TodoUpdate, TodoInDB, TodoResponse).
 """
-import pytest
 from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
-from app.models.todo import TodoBase, TodoCreate, TodoUpdate, TodoInDB, TodoResponse, Priority
+
+from app.models.todo import Priority, TodoBase, TodoCreate, TodoInDB, TodoResponse, TodoUpdate
 
 
 @pytest.mark.unit
@@ -13,11 +15,7 @@ class TestTodoBase:
 
     def test_create_todo_base_valid(self):
         """Test creating a valid TodoBase instance."""
-        todo = TodoBase(
-            title="Test Todo",
-            description="Test description",
-            completed=False
-        )
+        todo = TodoBase(title="Test Todo", description="Test description", completed=False)
 
         assert todo.title == "Test Todo"
         assert todo.description == "Test description"
@@ -85,7 +83,8 @@ class TestTodoBase:
 
         errors = exc_info.value.errors()
         assert any(
-            error["loc"] == ("description",) and "at most 1000 character" in str(error["msg"]).lower()
+            error["loc"] == ("description",)
+            and "at most 1000 character" in str(error["msg"]).lower()
             for error in errors
         )
 
@@ -124,11 +123,7 @@ class TestTodoCreate:
 
     def test_todo_create_inherits_from_base(self):
         """Test that TodoCreate has same validation as TodoBase."""
-        todo = TodoCreate(
-            title="Create Test",
-            description="Description",
-            completed=True
-        )
+        todo = TodoCreate(title="Create Test", description="Description", completed=True)
 
         assert todo.title == "Create Test"
         assert todo.description == "Description"
@@ -182,11 +177,7 @@ class TestTodoUpdate:
 
     def test_todo_update_all_fields(self):
         """Test updating all fields at once."""
-        todo_update = TodoUpdate(
-            title="New Title",
-            description="New Description",
-            completed=True
-        )
+        todo_update = TodoUpdate(title="New Title", description="New Description", completed=True)
 
         assert todo_update.title == "New Title"
         assert todo_update.description == "New Description"
@@ -225,7 +216,7 @@ class TestTodoInDB:
             description="Test description",
             completed=False,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert todo.id == "test-id-123"
@@ -235,11 +226,7 @@ class TestTodoInDB:
 
     def test_todo_in_db_timestamps_default(self):
         """Test that timestamps have default values."""
-        todo = TodoInDB(
-            id="test-id",
-            title="Test",
-            completed=False
-        )
+        todo = TodoInDB(id="test-id", title="Test", completed=False)
 
         assert isinstance(todo.created_at, datetime)
         assert isinstance(todo.updated_at, datetime)
@@ -258,23 +245,17 @@ class TestTodoInDB:
     def test_todo_in_db_json_encoders(self):
         """Test that datetime fields are properly encoded to ISO format."""
         now = datetime.utcnow()
-        todo = TodoInDB(
-            id="test-id",
-            title="Test",
-            completed=False,
-            created_at=now,
-            updated_at=now
-        )
+        todo = TodoInDB(id="test-id", title="Test", completed=False, created_at=now, updated_at=now)
 
         # Use model_dump with mode='json' to apply json encoders
-        json_data = todo.model_dump(mode='json')
+        json_data = todo.model_dump(mode="json")
 
         # Timestamps should be ISO format strings
         assert isinstance(json_data["created_at"], str)
         assert isinstance(json_data["updated_at"], str)
 
         # Should be parseable back to datetime
-        parsed_created = datetime.fromisoformat(json_data["created_at"].replace('Z', '+00:00'))
+        parsed_created = datetime.fromisoformat(json_data["created_at"].replace("Z", "+00:00"))
         assert isinstance(parsed_created, datetime)
 
     def test_todo_in_db_inherits_validation(self):
@@ -300,7 +281,7 @@ class TestTodoResponse:
             description="Description",
             completed=True,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert response.id == "response-id"
@@ -313,13 +294,10 @@ class TestTodoResponse:
     def test_todo_response_json_serialization(self):
         """Test that TodoResponse can be serialized to JSON."""
         response = TodoResponse(
-            id="test-id",
-            title="Test",
-            description="Description",
-            completed=False
+            id="test-id", title="Test", description="Description", completed=False
         )
 
-        json_data = response.model_dump(mode='json')
+        json_data = response.model_dump(mode="json")
 
         assert json_data["id"] == "test-id"
         assert json_data["title"] == "Test"
@@ -342,11 +320,7 @@ class TestModelRelationships:
     def test_create_to_response_workflow(self):
         """Test converting from TodoCreate to TodoResponse workflow."""
         # Create
-        create_data = TodoCreate(
-            title="New Todo",
-            description="Description",
-            completed=False
-        )
+        create_data = TodoCreate(title="New Todo", description="Description", completed=False)
 
         # Simulate DB storage (adding id and timestamps)
         now = datetime.utcnow()
@@ -356,7 +330,7 @@ class TestModelRelationships:
             description=create_data.description,
             completed=create_data.completed,
             created_at=now,
-            updated_at=now
+            updated_at=now,
         )
 
         assert response.title == create_data.title
@@ -371,7 +345,7 @@ class TestModelRelationships:
             id="test-id",
             title="Original Title",
             description="Original Description",
-            completed=False
+            completed=False,
         )
 
         # Update
@@ -467,26 +441,16 @@ class TestPriority:
 
         # Test optional
         update_no_priority = TodoUpdate(title="Updated")
-        assert not hasattr(update_no_priority, 'priority') or update_no_priority.priority is None
+        assert not hasattr(update_no_priority, "priority") or update_no_priority.priority is None
 
     def test_priority_in_todo_in_db(self):
         """Test priority field in TodoInDB."""
-        todo = TodoInDB(
-            id="test-id",
-            title="Test",
-            completed=False,
-            priority=Priority.HIGH
-        )
+        todo = TodoInDB(id="test-id", title="Test", completed=False, priority=Priority.HIGH)
         assert todo.priority == Priority.HIGH
 
     def test_priority_in_todo_response(self):
         """Test priority field in TodoResponse."""
-        response = TodoResponse(
-            id="test-id",
-            title="Test",
-            completed=False,
-            priority=Priority.LOW
-        )
+        response = TodoResponse(id="test-id", title="Test", completed=False, priority=Priority.LOW)
         assert response.priority == Priority.LOW
 
     def test_done_field_default(self):

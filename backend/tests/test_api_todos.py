@@ -40,7 +40,7 @@ class TestCreateTodo:
         todo_data = {
             "title": "Already Done",
             "description": "This was done before creation",
-            "completed": True
+            "completed": True,
         }
         response = test_client.post("/api/todos/", json=todo_data)
 
@@ -73,7 +73,7 @@ class TestCreateTodo:
         """Test that creating todo with too long description fails validation."""
         todo_data = {
             "title": "Valid Title",
-            "description": "x" * 1001  # Max is 1000
+            "description": "x" * 1001,  # Max is 1000
         }
         response = test_client.post("/api/todos/", json=todo_data)
 
@@ -248,11 +248,7 @@ class TestUpdateTodo:
         create_response = test_client.post("/api/todos/", json=sample_todo_create)
         todo_id = create_response.json()["id"]
 
-        update_data = {
-            "title": "New Title",
-            "description": "New Description",
-            "completed": True
-        }
+        update_data = {"title": "New Title", "description": "New Description", "completed": True}
         response = test_client.patch(f"/api/todos/{todo_id}", json=update_data)
 
         assert response.status_code == status.HTTP_200_OK
@@ -287,6 +283,7 @@ class TestUpdateTodo:
 
         # Small delay to ensure timestamp difference
         import time
+
         time.sleep(0.01)
 
         update_data = {"title": "Updated"}
@@ -462,7 +459,7 @@ class TestTodoPriority:
         todo_data = {
             "title": "High Priority Task",
             "description": "This is urgent",
-            "priority": "high"
+            "priority": "high",
         }
         response = test_client.post("/api/todos/", json=todo_data)
 
@@ -472,10 +469,7 @@ class TestTodoPriority:
 
     def test_create_todo_with_low_priority(self, test_client):
         """Test creating todo with low priority."""
-        todo_data = {
-            "title": "Low Priority Task",
-            "priority": "low"
-        }
+        todo_data = {"title": "Low Priority Task", "priority": "low"}
         response = test_client.post("/api/todos/", json=todo_data)
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -510,7 +504,7 @@ class TestTodoPriority:
         """Test that invalid priority value fails validation."""
         todo_data = {
             "title": "Invalid Priority",
-            "priority": "urgent"  # Not a valid priority
+            "priority": "urgent",  # Not a valid priority
         }
         response = test_client.post("/api/todos/", json=todo_data)
 
@@ -522,7 +516,7 @@ class TestTodoPriority:
         todos_data = [
             {"title": "High Priority", "priority": "high"},
             {"title": "Medium Priority", "priority": "medium"},
-            {"title": "Low Priority", "priority": "low"}
+            {"title": "Low Priority", "priority": "low"},
         ]
 
         for todo_data in todos_data:
@@ -546,10 +540,7 @@ class TestTodoPriority:
         todo_id = create_response.json()["id"]
 
         # Update to low priority
-        update_response = test_client.patch(
-            f"/api/todos/{todo_id}",
-            json={"priority": "low"}
-        )
+        update_response = test_client.patch(f"/api/todos/{todo_id}", json={"priority": "low"})
 
         assert update_response.status_code == status.HTTP_200_OK
         assert update_response.json()["priority"] == "low"

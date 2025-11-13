@@ -74,9 +74,7 @@ export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogP
           <DialogHeader>
             <DialogTitle>{editTodo ? 'Edit Todo' : 'Create New Todo'}</DialogTitle>
             <DialogDescription>
-              {editTodo
-                ? 'Update your todo item details'
-                : 'Add a new todo item to your list'}
+              {editTodo ? 'Update your todo item details' : 'Add a new todo item to your list'}
             </DialogDescription>
           </DialogHeader>
 
@@ -119,11 +117,7 @@ export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogP
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={!title.trim()}>

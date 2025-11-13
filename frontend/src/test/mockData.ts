@@ -1,4 +1,4 @@
-import { Todo } from '@/types/todo'
+import { Todo } from '@/types/todo';
 
 export const mockTodo: Todo = {
   id: '1',
@@ -8,7 +8,7 @@ export const mockTodo: Todo = {
   priority: 'medium',
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z',
-}
+};
 
 export const mockCompletedTodo: Todo = {
   id: '2',
@@ -18,7 +18,7 @@ export const mockCompletedTodo: Todo = {
   priority: 'low',
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z',
-}
+};
 
 export const mockTodos: Todo[] = [
   mockTodo,
@@ -32,4 +32,4 @@ export const mockTodos: Todo[] = [
     created_at: '2024-01-02T00:00:00.000Z',
     updated_at: '2024-01-02T00:00:00.000Z',
   },
-]
+];

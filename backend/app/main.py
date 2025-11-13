@@ -7,7 +7,7 @@ from app.services.redis_service import redis_service
 app = FastAPI(
     title="Todo App API",
     description="A simple Todo application API with Redis backend",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Configure CORS
@@ -26,11 +26,7 @@ app.include_router(todos_router, prefix="/api")
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {
-        "message": "Todo App API",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+    return {"message": "Todo App API", "version": "1.0.0", "docs": "/docs"}
 
 
 @app.get("/health")
@@ -40,7 +36,7 @@ async def health_check():
 
     return {
         "status": "healthy" if redis_healthy else "unhealthy",
-        "redis": "connected" if redis_healthy else "disconnected"
+        "redis": "connected" if redis_healthy else "disconnected",
     }
 
 

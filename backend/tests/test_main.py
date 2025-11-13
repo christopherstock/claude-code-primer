@@ -74,7 +74,7 @@ class TestCORS:
             headers={
                 "Origin": "http://localhost:5173",
                 "Access-Control-Request-Method": "GET",
-            }
+            },
         )
 
         # Check for CORS headers
@@ -118,8 +118,9 @@ class TestLifecycleEvents:
 
     def test_startup_event(self, capsys):
         """Test startup event handler executes."""
-        from app.main import app, startup_event
         import asyncio
+
+        from app.main import startup_event
 
         # Run the startup event
         asyncio.run(startup_event())
@@ -131,8 +132,9 @@ class TestLifecycleEvents:
 
     def test_shutdown_event(self, capsys):
         """Test shutdown event handler executes."""
-        from app.main import shutdown_event
         import asyncio
+
+        from app.main import shutdown_event
 
         # Run the shutdown event
         asyncio.run(shutdown_event())

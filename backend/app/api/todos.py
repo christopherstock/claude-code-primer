@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
-from typing import List
 import uuid
 
-from app.models.todo import TodoCreate, TodoUpdate, TodoResponse
+from fastapi import APIRouter, HTTPException, status
+
+from app.models.todo import TodoCreate, TodoResponse, TodoUpdate
 from app.services.redis_service import redis_service
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -18,7 +18,7 @@ async def create_todo(todo: TodoCreate):
     return created_todo
 
 
-@router.get("/", response_model=List[TodoResponse])
+@router.get("/", response_model=list[TodoResponse])
 async def get_all_todos():
     """Get all todo items"""
     todos = redis_service.get_all_todos()
@@ -32,8 +32,7 @@ async def get_todo(todo_id: str):
 
     if not todo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Todo with id {todo_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Todo with id {todo_id} not found"
         )
 
     return todo
@@ -49,8 +48,7 @@ async def update_todo(todo_id: str, todo_update: TodoUpdate):
 
     if not updated_todo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Todo with id {todo_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Todo with id {todo_id} not found"
         )
 
     return updated_todo
@@ -63,8 +61,7 @@ async def delete_todo(todo_id: str):
 
     if not deleted:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Todo with id {todo_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Todo with id {todo_id} not found"
         )
 
     return None

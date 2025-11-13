@@ -128,9 +128,7 @@ export function HomePage() {
                   <span className="font-semibold">{stats.completed}</span>
                 </div>
               </div>
-              <Button onClick={() => setDialogOpen(true)}>
-                Create New Todo
-              </Button>
+              <Button onClick={() => setDialogOpen(true)}>Create New Todo</Button>
             </div>
           </CardContent>
         </Card>

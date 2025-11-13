@@ -4,7 +4,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const API_ENDPOINT = `${API_BASE_URL}/api/todos`;
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string
+  ) {
     super(message);
     this.name = 'ApiError';
   }

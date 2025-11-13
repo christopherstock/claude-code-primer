@@ -56,18 +56,10 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onEdit(todo)}
-          >
+          <Button variant="outline" size="sm" onClick={() => onEdit(todo)}>
             Edit
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onDelete(todo.id)}
-          >
+          <Button variant="destructive" size="sm" onClick={() => onDelete(todo.id)}>
             Delete
           </Button>
         </div>

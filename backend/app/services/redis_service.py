@@ -1,8 +1,8 @@
-import redis
 import json
 import os
-from typing import Optional, List
 from datetime import datetime
+
+import redis
 
 
 class RedisService:
@@ -13,7 +13,7 @@ class RedisService:
             host=os.getenv("REDIS_HOST", "localhost"),
             port=int(os.getenv("REDIS_PORT", 6379)),
             db=int(os.getenv("REDIS_DB", 0)),
-            decode_responses=True
+            decode_responses=True,
         )
         self.todo_key_prefix = "todo:"
         self.todo_list_key = "todos:list"
@@ -37,7 +37,7 @@ class RedisService:
 
         return todo_data
 
-    def get_todo(self, todo_id: str) -> Optional[dict]:
+    def get_todo(self, todo_id: str) -> dict | None:
         """Get a todo by ID"""
         key = self._get_todo_key(todo_id)
         data = self.redis_client.get(key)
@@ -46,7 +46,7 @@ class RedisService:
             return json.loads(data)
         return None
 
-    def get_all_todos(self) -> List[dict]:
+    def get_all_todos(self) -> list[dict]:
         """Get all todos"""
         todo_ids = self.redis_client.lrange(self.todo_list_key, 0, -1)
         todos = []
@@ -58,7 +58,7 @@ class RedisService:
 
         return todos
 
-    def update_todo(self, todo_id: str, update_data: dict) -> Optional[dict]:
+    def update_todo(self, todo_id: str, update_data: dict) -> dict | None:
         """Update an existing todo"""
         todo = self.get_todo(todo_id)
 
@@ -95,7 +95,7 @@ class RedisService:
         try:
             self.redis_client.ping()
             return True
-        except Exception:
+        except Exception:  # noqa: BLE001
             return False
 
 
