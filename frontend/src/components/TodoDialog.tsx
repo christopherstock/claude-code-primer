@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Todo, TodoCreate, TodoUpdate } from '@/types/todo';
+import { Todo, TodoCreate, TodoUpdate, Priority } from '@/types/todo';
 import {
   Dialog,
   DialogContent,
@@ -23,14 +23,17 @@ interface TodoDialogProps {
 export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<Priority>('medium');
 
   useEffect(() => {
     if (editTodo) {
       setTitle(editTodo.title);
       setDescription(editTodo.description || '');
+      setPriority(editTodo.priority);
     } else {
       setTitle('');
       setDescription('');
+      setPriority('medium');
     }
   }, [editTodo, open]);
 
@@ -47,6 +50,7 @@ export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogP
         updates: {
           title: title.trim(),
           description: description.trim() || undefined,
+          priority,
         },
       });
     } else {
@@ -54,6 +58,7 @@ export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogP
         title: title.trim(),
         description: description.trim() || undefined,
         completed: false,
+        priority,
       });
     }
 
@@ -96,6 +101,20 @@ export function TodoDialog({ open, onOpenChange, onSave, editTodo }: TodoDialogP
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <select
+                id="priority"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as Priority)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
             </div>
           </div>
 

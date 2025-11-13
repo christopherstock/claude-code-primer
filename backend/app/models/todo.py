@@ -1,6 +1,14 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
+from enum import Enum
+
+
+class Priority(str, Enum):
+    """Priority levels for todos"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
 class TodoBase(BaseModel):
@@ -8,6 +16,8 @@ class TodoBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200, description="Todo title")
     description: Optional[str] = Field(None, max_length=1000, description="Todo description")
     completed: bool = Field(default=False, description="Completion status")
+    done: bool = Field(default=False, description="Done status - marks item as fully completed")
+    priority: Priority = Field(default=Priority.MEDIUM, description="Priority level")
 
 
 class TodoCreate(TodoBase):
@@ -20,6 +30,8 @@ class TodoUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=200)
     description: Optional[str] = Field(None, max_length=1000)
     completed: Optional[bool] = None
+    done: Optional[bool] = None
+    priority: Optional[Priority] = None
 
 
 class TodoInDB(TodoBase):

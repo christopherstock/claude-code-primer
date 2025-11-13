@@ -1,4 +1,4 @@
-import { Todo } from '@/types/todo';
+import { Todo, Priority } from '@/types/todo';
 import { TodoItem } from './TodoItem';
 
 interface TodoListProps {
@@ -7,6 +7,12 @@ interface TodoListProps {
   onEdit: (todo: Todo) => void;
   onDelete: (id: string) => void;
 }
+
+const priorityOrder: Record<Priority, number> = {
+  high: 1,
+  medium: 2,
+  low: 3,
+};
 
 export function TodoList({ todos, onToggle, onEdit, onDelete }: TodoListProps) {
   if (todos.length === 0) {
@@ -17,7 +23,10 @@ export function TodoList({ todos, onToggle, onEdit, onDelete }: TodoListProps) {
     );
   }
 
-  const incompleteTodos = todos.filter((todo) => !todo.completed);
+  const incompleteTodos = todos
+    .filter((todo) => !todo.completed)
+    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
   const completedTodos = todos.filter((todo) => todo.completed);
 
   return (
