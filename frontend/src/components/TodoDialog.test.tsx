@@ -76,6 +76,7 @@ describe('TodoDialog', () => {
         title: 'New Todo',
         description: 'New Description',
         completed: false,
+        priority: 'medium',
       })
       expect(mockOnOpenChange).toHaveBeenCalledWith(false)
     })
@@ -100,6 +101,7 @@ describe('TodoDialog', () => {
         title: 'New Todo',
         description: undefined,
         completed: false,
+        priority: 'medium',
       })
     })
 
@@ -123,6 +125,7 @@ describe('TodoDialog', () => {
         title: 'Trimmed Title',
         description: undefined,
         completed: false,
+        priority: 'medium',
       })
     })
 
@@ -148,6 +151,7 @@ describe('TodoDialog', () => {
         title: 'Title',
         description: 'Trimmed Description',
         completed: false,
+        priority: 'medium',
       })
     })
 
@@ -217,6 +221,57 @@ describe('TodoDialog', () => {
       await user.type(titleInput, 'New Todo')
 
       expect(createButton).not.toBeDisabled()
+    })
+
+    it('should render priority selector', () => {
+      render(
+        <TodoDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSave={mockOnSave}
+        />
+      )
+
+      expect(screen.getByLabelText(/Priority/i)).toBeInTheDocument()
+    })
+
+    it('should default priority to medium', () => {
+      render(
+        <TodoDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSave={mockOnSave}
+        />
+      )
+
+      const prioritySelect = screen.getByLabelText(/Priority/i) as HTMLSelectElement
+      expect(prioritySelect.value).toBe('medium')
+    })
+
+    it('should create todo with selected priority', async () => {
+      const user = userEvent.setup()
+      render(
+        <TodoDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSave={mockOnSave}
+        />
+      )
+
+      const titleInput = screen.getByLabelText(/Title/i)
+      const prioritySelect = screen.getByLabelText(/Priority/i)
+      const createButton = screen.getByText('Create')
+
+      await user.type(titleInput, 'High Priority Task')
+      await user.selectOptions(prioritySelect, 'high')
+      await user.click(createButton)
+
+      expect(mockOnSave).toHaveBeenCalledWith({
+        title: 'High Priority Task',
+        description: undefined,
+        completed: false,
+        priority: 'high',
+      })
     })
   })
 
@@ -296,6 +351,7 @@ describe('TodoDialog', () => {
         updates: {
           title: 'Updated Title',
           description: 'Updated Description',
+          priority: 'medium',
         },
       })
       expect(mockOnOpenChange).toHaveBeenCalledWith(false)
@@ -327,6 +383,47 @@ describe('TodoDialog', () => {
 
       // Form should be cleared
       expect(titleInput.value).toBe('')
+    })
+
+    it('should pre-fill priority in edit mode', () => {
+      render(
+        <TodoDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSave={mockOnSave}
+          editTodo={mockTodo}
+        />
+      )
+
+      const prioritySelect = screen.getByLabelText(/Priority/i) as HTMLSelectElement
+      expect(prioritySelect.value).toBe(mockTodo.priority)
+    })
+
+    it('should update todo with changed priority', async () => {
+      const user = userEvent.setup()
+      render(
+        <TodoDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          onSave={mockOnSave}
+          editTodo={mockTodo}
+        />
+      )
+
+      const prioritySelect = screen.getByLabelText(/Priority/i)
+      const updateButton = screen.getByText('Update')
+
+      await user.selectOptions(prioritySelect, 'high')
+      await user.click(updateButton)
+
+      expect(mockOnSave).toHaveBeenCalledWith({
+        id: mockTodo.id,
+        updates: {
+          title: mockTodo.title,
+          description: mockTodo.description,
+          priority: 'high',
+        },
+      })
     })
   })
 
@@ -410,6 +507,7 @@ describe('TodoDialog', () => {
         title: 'Test Title',
         description: undefined,
         completed: false,
+        priority: 'medium',
       })
     })
   })

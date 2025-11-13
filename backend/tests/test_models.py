@@ -4,7 +4,7 @@ Tests for Pydantic models (TodoBase, TodoCreate, TodoUpdate, TodoInDB, TodoRespo
 import pytest
 from datetime import datetime
 from pydantic import ValidationError
-from app.models.todo import TodoBase, TodoCreate, TodoUpdate, TodoInDB, TodoResponse
+from app.models.todo import TodoBase, TodoCreate, TodoUpdate, TodoInDB, TodoResponse, Priority
 
 
 @pytest.mark.unit
@@ -410,3 +410,104 @@ class TestModelRelationships:
 
         response = TodoResponse(id="test", title="Test", completed=False)
         assert isinstance(response.model_dump(), dict)
+
+
+@pytest.mark.unit
+class TestPriority:
+    """Tests for Priority enum and priority field."""
+
+    def test_priority_enum_values(self):
+        """Test that Priority enum has expected values."""
+        assert Priority.LOW == "low"
+        assert Priority.MEDIUM == "medium"
+        assert Priority.HIGH == "high"
+
+    def test_priority_default_value(self):
+        """Test that priority defaults to medium."""
+        todo = TodoBase(title="Test")
+        assert todo.priority == Priority.MEDIUM
+
+    def test_priority_all_values(self):
+        """Test creating todos with all priority values."""
+        todo_low = TodoBase(title="Low Priority", priority=Priority.LOW)
+        assert todo_low.priority == Priority.LOW
+
+        todo_medium = TodoBase(title="Medium Priority", priority=Priority.MEDIUM)
+        assert todo_medium.priority == Priority.MEDIUM
+
+        todo_high = TodoBase(title="High Priority", priority=Priority.HIGH)
+        assert todo_high.priority == Priority.HIGH
+
+    def test_priority_with_string(self):
+        """Test creating todo with priority as string."""
+        todo = TodoBase(title="Test", priority="high")
+        assert todo.priority == Priority.HIGH
+
+    def test_priority_invalid_value(self):
+        """Test that invalid priority value fails validation."""
+        with pytest.raises(ValidationError) as exc_info:
+            TodoBase(title="Test", priority="invalid")
+
+        errors = exc_info.value.errors()
+        assert any("priority" in str(error["loc"]) for error in errors)
+
+    def test_priority_in_todo_create(self):
+        """Test priority field in TodoCreate."""
+        todo = TodoCreate(title="Test", priority=Priority.HIGH)
+        assert todo.priority == Priority.HIGH
+
+        # Test default
+        todo_default = TodoCreate(title="Test")
+        assert todo_default.priority == Priority.MEDIUM
+
+    def test_priority_in_todo_update(self):
+        """Test priority field in TodoUpdate."""
+        update = TodoUpdate(priority=Priority.LOW)
+        assert update.priority == Priority.LOW
+
+        # Test optional
+        update_no_priority = TodoUpdate(title="Updated")
+        assert not hasattr(update_no_priority, 'priority') or update_no_priority.priority is None
+
+    def test_priority_in_todo_in_db(self):
+        """Test priority field in TodoInDB."""
+        todo = TodoInDB(
+            id="test-id",
+            title="Test",
+            completed=False,
+            priority=Priority.HIGH
+        )
+        assert todo.priority == Priority.HIGH
+
+    def test_priority_in_todo_response(self):
+        """Test priority field in TodoResponse."""
+        response = TodoResponse(
+            id="test-id",
+            title="Test",
+            completed=False,
+            priority=Priority.LOW
+        )
+        assert response.priority == Priority.LOW
+
+    def test_done_field_default(self):
+        """Test that done field defaults to False."""
+        todo = TodoBase(title="Test")
+        assert todo.done is False
+
+    def test_done_field_all_models(self):
+        """Test done field in all models."""
+        # TodoCreate
+        create = TodoCreate(title="Test", done=True)
+        assert create.done is True
+
+        # TodoUpdate
+        update = TodoUpdate(done=True)
+        assert update.done is True
+
+        # TodoInDB
+        in_db = TodoInDB(id="test", title="Test", completed=False, done=True)
+        assert in_db.done is True
+
+        # TodoResponse
+        response = TodoResponse(id="test", title="Test", completed=False, done=True)
+        assert response.done is True

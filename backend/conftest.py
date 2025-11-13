@@ -38,17 +38,22 @@ def mock_redis(fake_redis_client, monkeypatch):
 
 
 @pytest.fixture
-def test_client(mock_redis):
+def test_client(fake_redis_client):
     """Create a test client for the FastAPI application."""
     # Import app after Redis is mocked
     from app.main import app
     from app.services import redis_service as svc
 
-    # Replace the redis client in the singleton service
-    fake_redis = fakeredis.FakeRedis(decode_responses=True)
-    svc.redis_service.redis_client = fake_redis
+    # Replace the redis client in the singleton service with the shared fake_redis_client
+    svc.redis_service.redis_client = fake_redis_client
 
-    return TestClient(app)
+    # Clear the database before each test
+    fake_redis_client.flushall()
+
+    yield TestClient(app)
+
+    # Clean up after the test
+    fake_redis_client.flushall()
 
 
 @pytest.fixture
@@ -68,7 +73,8 @@ def sample_todo_data():
     return {
         "title": "Test Todo",
         "description": "This is a test todo item",
-        "completed": False
+        "completed": False,
+        "priority": "medium"
     }
 
 
@@ -78,7 +84,8 @@ def sample_todo_create():
     return {
         "title": "New Todo",
         "description": "A new todo item",
-        "completed": False
+        "completed": False,
+        "priority": "medium"
     }
 
 
@@ -89,16 +96,19 @@ def multiple_todos():
         {
             "title": "First Todo",
             "description": "First item",
-            "completed": False
+            "completed": False,
+            "priority": "high"
         },
         {
             "title": "Second Todo",
             "description": "Second item",
-            "completed": True
+            "completed": True,
+            "priority": "low"
         },
         {
             "title": "Third Todo",
             "description": "Third item",
-            "completed": False
+            "completed": False,
+            "priority": "medium"
         }
     ]

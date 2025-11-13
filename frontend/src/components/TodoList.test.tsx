@@ -181,4 +181,52 @@ describe('TodoList', () => {
     expect(screen.getByText('Completed')).toBeInTheDocument()
     expect(screen.getByText(mockCompletedTodo.title)).toBeInTheDocument()
   })
+
+  it('should sort active todos by priority (high, medium, low)', () => {
+    const unsortedTodos = [
+      { ...mockTodo, id: '1', title: 'Low Priority', priority: 'low' as const, completed: false },
+      { ...mockTodo, id: '2', title: 'High Priority', priority: 'high' as const, completed: false },
+      { ...mockTodo, id: '3', title: 'Medium Priority', priority: 'medium' as const, completed: false },
+    ]
+
+    render(<TodoList todos={unsortedTodos} {...mockHandlers} />)
+
+    const todoTitles = screen.getAllByRole('heading', { level: 3 })
+    expect(todoTitles[0]).toHaveTextContent('High Priority')
+    expect(todoTitles[1]).toHaveTextContent('Medium Priority')
+    expect(todoTitles[2]).toHaveTextContent('Low Priority')
+  })
+
+  it('should not sort completed todos by priority', () => {
+    const completedTodos = [
+      { ...mockTodo, id: '1', title: 'Low Priority Completed', priority: 'low' as const, completed: true },
+      { ...mockTodo, id: '2', title: 'High Priority Completed', priority: 'high' as const, completed: true },
+    ]
+
+    render(<TodoList todos={completedTodos} {...mockHandlers} />)
+
+    // Completed todos should appear in original order, not sorted by priority
+    const todoTitles = screen.getAllByRole('heading', { level: 3 })
+    expect(todoTitles[0]).toHaveTextContent('Low Priority Completed')
+    expect(todoTitles[1]).toHaveTextContent('High Priority Completed')
+  })
+
+  it('should sort only active todos while keeping completed todos unsorted', () => {
+    const mixedTodos = [
+      { ...mockTodo, id: '1', title: 'Low Active', priority: 'low' as const, completed: false },
+      { ...mockTodo, id: '2', title: 'High Completed', priority: 'high' as const, completed: true },
+      { ...mockTodo, id: '3', title: 'High Active', priority: 'high' as const, completed: false },
+      { ...mockTodo, id: '4', title: 'Low Completed', priority: 'low' as const, completed: true },
+    ]
+
+    render(<TodoList todos={mixedTodos} {...mockHandlers} />)
+
+    const activeTitles = screen.getByText('Active').parentElement!.querySelectorAll('h3')
+    expect(activeTitles[0]).toHaveTextContent('High Active')
+    expect(activeTitles[1]).toHaveTextContent('Low Active')
+
+    const completedTitles = screen.getByText('Completed').parentElement!.querySelectorAll('h3')
+    expect(completedTitles[0]).toHaveTextContent('High Completed')
+    expect(completedTitles[1]).toHaveTextContent('Low Completed')
+  })
 })

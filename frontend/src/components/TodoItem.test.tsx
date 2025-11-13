@@ -140,4 +140,36 @@ describe('TodoItem', () => {
       false
     )
   })
+
+  it('should render priority badge', () => {
+    render(<TodoItem todo={mockTodo} {...mockHandlers} />)
+
+    expect(screen.getByText('Medium')).toBeInTheDocument()
+  })
+
+  it('should render high priority badge with correct style', () => {
+    const highPriorityTodo = { ...mockTodo, priority: 'high' as const }
+    render(<TodoItem todo={highPriorityTodo} {...mockHandlers} />)
+
+    const badge = screen.getByText('High')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-red-100')
+  })
+
+  it('should render low priority badge with correct style', () => {
+    const lowPriorityTodo = { ...mockTodo, priority: 'low' as const }
+    render(<TodoItem todo={lowPriorityTodo} {...mockHandlers} />)
+
+    const badge = screen.getByText('Low')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-green-100')
+  })
+
+  it('should render medium priority badge with correct style', () => {
+    render(<TodoItem todo={mockTodo} {...mockHandlers} />)
+
+    const badge = screen.getByText('Medium')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveClass('bg-yellow-100')
+  })
 })

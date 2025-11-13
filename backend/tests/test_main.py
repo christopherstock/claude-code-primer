@@ -110,3 +110,33 @@ class TestAPIDocumentation:
 
         assert response.status_code == status.HTTP_200_OK
         assert "text/html" in response.headers["content-type"]
+
+
+@pytest.mark.api
+class TestLifecycleEvents:
+    """Tests for application lifecycle events."""
+
+    def test_startup_event(self, capsys):
+        """Test startup event handler executes."""
+        from app.main import app, startup_event
+        import asyncio
+
+        # Run the startup event
+        asyncio.run(startup_event())
+
+        # Capture printed output
+        captured = capsys.readouterr()
+        assert "Starting Todo App API..." in captured.out
+        assert "Redis connection:" in captured.out
+
+    def test_shutdown_event(self, capsys):
+        """Test shutdown event handler executes."""
+        from app.main import shutdown_event
+        import asyncio
+
+        # Run the shutdown event
+        asyncio.run(shutdown_event())
+
+        # Capture printed output
+        captured = capsys.readouterr()
+        assert "Shutting down Todo App API..." in captured.out

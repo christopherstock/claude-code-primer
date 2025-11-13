@@ -18,6 +18,7 @@ class TestCreateTodo:
         assert data["title"] == sample_todo_create["title"]
         assert data["description"] == sample_todo_create["description"]
         assert data["completed"] == sample_todo_create["completed"]
+        assert data["priority"] == sample_todo_create["priority"]
         assert "id" in data
         assert "created_at" in data
         assert "updated_at" in data
@@ -32,6 +33,7 @@ class TestCreateTodo:
         assert data["title"] == "Minimal Todo"
         assert data["description"] is None
         assert data["completed"] is False
+        assert data["priority"] == "medium"  # Default priority
 
     def test_create_todo_completed(self, test_client):
         """Test creating a todo that's already completed."""
@@ -147,6 +149,7 @@ class TestGetAllTodos:
         assert "title" in todo
         assert "description" in todo
         assert "completed" in todo
+        assert "priority" in todo
         assert "created_at" in todo
         assert "updated_at" in todo
 
@@ -448,3 +451,153 @@ class TestTodoWorkflow:
         # Check that deleted todo is not in list
         final_ids = [todo["id"] for todo in final_todos]
         assert created_ids[1] not in final_ids
+
+
+@pytest.mark.api
+class TestTodoPriority:
+    """Tests for todo priority field."""
+
+    def test_create_todo_with_high_priority(self, test_client):
+        """Test creating todo with high priority."""
+        todo_data = {
+            "title": "High Priority Task",
+            "description": "This is urgent",
+            "priority": "high"
+        }
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["priority"] == "high"
+
+    def test_create_todo_with_low_priority(self, test_client):
+        """Test creating todo with low priority."""
+        todo_data = {
+            "title": "Low Priority Task",
+            "priority": "low"
+        }
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["priority"] == "low"
+
+    def test_create_todo_default_priority(self, test_client):
+        """Test that todo gets medium priority by default."""
+        todo_data = {"title": "No Priority Specified"}
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["priority"] == "medium"
+
+    def test_update_todo_priority(self, test_client, sample_todo_create):
+        """Test updating todo priority."""
+        # Create a todo
+        create_response = test_client.post("/api/todos/", json=sample_todo_create)
+        todo_id = create_response.json()["id"]
+
+        # Update priority to high
+        update_data = {"priority": "high"}
+        update_response = test_client.patch(f"/api/todos/{todo_id}", json=update_data)
+
+        assert update_response.status_code == status.HTTP_200_OK
+        data = update_response.json()
+        assert data["priority"] == "high"
+        assert data["title"] == sample_todo_create["title"]  # Other fields unchanged
+
+    def test_create_todo_invalid_priority(self, test_client):
+        """Test that invalid priority value fails validation."""
+        todo_data = {
+            "title": "Invalid Priority",
+            "priority": "urgent"  # Not a valid priority
+        }
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def test_get_todos_includes_priority(self, test_client):
+        """Test that getting todos includes priority field."""
+        # Create todos with different priorities
+        todos_data = [
+            {"title": "High Priority", "priority": "high"},
+            {"title": "Medium Priority", "priority": "medium"},
+            {"title": "Low Priority", "priority": "low"}
+        ]
+
+        for todo_data in todos_data:
+            test_client.post("/api/todos/", json=todo_data)
+
+        # Get all todos
+        response = test_client.get("/api/todos/")
+        todos = response.json()
+
+        assert len(todos) == 3
+        priorities = [todo["priority"] for todo in todos]
+        assert "high" in priorities
+        assert "medium" in priorities
+        assert "low" in priorities
+
+    def test_update_todo_priority_to_low(self, test_client):
+        """Test updating priority from high to low."""
+        # Create high priority todo
+        todo_data = {"title": "Downgrade Priority", "priority": "high"}
+        create_response = test_client.post("/api/todos/", json=todo_data)
+        todo_id = create_response.json()["id"]
+
+        # Update to low priority
+        update_response = test_client.patch(
+            f"/api/todos/{todo_id}",
+            json={"priority": "low"}
+        )
+
+        assert update_response.status_code == status.HTTP_200_OK
+        assert update_response.json()["priority"] == "low"
+
+
+@pytest.mark.api
+class TestTodoDone:
+    """Tests for todo done field."""
+
+    def test_create_todo_done_default(self, test_client):
+        """Test that done defaults to False."""
+        todo_data = {"title": "Test Done Field"}
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["done"] is False
+
+    def test_create_todo_with_done_true(self, test_client):
+        """Test creating todo with done=True."""
+        todo_data = {"title": "Already Done", "done": True}
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["done"] is True
+
+    def test_update_todo_done_status(self, test_client, sample_todo_create):
+        """Test updating todo done status."""
+        # Create a todo
+        create_response = test_client.post("/api/todos/", json=sample_todo_create)
+        todo_id = create_response.json()["id"]
+
+        # Update done to True
+        update_data = {"done": True}
+        update_response = test_client.patch(f"/api/todos/{todo_id}", json=update_data)
+
+        assert update_response.status_code == status.HTTP_200_OK
+        data = update_response.json()
+        assert data["done"] is True
+
+    def test_done_and_completed_are_independent(self, test_client):
+        """Test that done and completed fields are independent."""
+        # Create todo with done=True but completed=False
+        todo_data = {"title": "Test Independence", "done": True, "completed": False}
+        response = test_client.post("/api/todos/", json=todo_data)
+
+        assert response.status_code == status.HTTP_201_CREATED
+        data = response.json()
+        assert data["done"] is True
+        assert data["completed"] is False
